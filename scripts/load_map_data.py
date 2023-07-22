@@ -4,7 +4,7 @@ from collections import namedtuple
 from src.hikeplanner.settings import PROJECT_PATH, GOOGLE_MAPS_API_KEY
 import gpxpy
 from gpxpy.gpx import GPX, PointData, GPXTrackPoint
-from pandas import DataFrame
+from pandas import DataFrame, read_json
 import pydeck as dek
 
 os.environ['GOOGLE_MAPS_API_KEY'] = GOOGLE_MAPS_API_KEY
@@ -24,7 +24,7 @@ def yield_gpx_map_points(gpx: GPX) -> list[float]:
     point_data: PointData
     for point_data in gpx.get_points_data(distance_2d = False):
         point = point_data.point
-        yield [point.latitude, point.longitude]
+        yield [point.longitude, point.latitude]
         
 def generate_path(gpx: GPX) -> dict[Literal['path'], list[list[float]]]:
     """
