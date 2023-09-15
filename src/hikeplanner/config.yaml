@@ -1,0 +1,10 @@
+---
+deck:
+  map_provider: 'google_maps'
+  map_style: 'roadmap'
+
+layer:
+  type: PathLayer
+  get_path: path
+  get_color: color
+  width_min_pixels: 2
