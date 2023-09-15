@@ -1,13 +1,17 @@
-import os
-from typing import TypeVar, Literal
+from typing import Final
+from pathlib import Path
+from typing import Literal
 from collections import namedtuple
-from src.hikeplanner.settings import PROJECT_PATH, GOOGLE_MAPS_API_KEY
 import gpxpy
 from gpxpy.gpx import GPX, PointData, GPXTrackPoint
-from pandas import DataFrame, read_json
 import pydeck as dek
+import dotenv
+from src.hikeplanner import presets
 
-os.environ['GOOGLE_MAPS_API_KEY'] = GOOGLE_MAPS_API_KEY
+dot_env = dotenv.find_dotenv()
+PROJECT_PATH: Final[Path] = Path(dotenv.get_key(dot_env, 'PROJECT_DIR'))
+with open(Path(dotenv.get_key(dot_env, 'MAPS_API_KEY_PATH'))) as f:
+    GOOGLE_MAPS_API_KEY: Final[str] = f.read()
 
 # Namespace
 PathData = namedtuple(
@@ -30,10 +34,10 @@ def generate_path(gpx: GPX) -> dict[Literal['path'], list[list[float]]]:
     """
     Converts gpx file format to a coordinate format usable by Layers
     """
-    return {
+    return [{
         'path': [el for el in yield_gpx_map_points(gpx = gpx)],
         'colour': (0, 0, 0)
-    }
+    }]
     
 
 if __name__ == "__main__":
@@ -42,22 +46,21 @@ if __name__ == "__main__":
         data = generate_path(gpxpy.parse(f))
 
     path_lyr = dek.Layer(
-        type = 'PathLayer',
-        data = DataFrame([data]),
-        get_path = 'path',
-        get_color = 'colour',
-        get_width=20
+        data = data,
+        **presets['layer']
     )
 
     view_state = dek.ViewState(
-    latitude = data['path'][-1][0],
-    longitude = data['path'][-1][1],
+    latitude = data[0]['path'][-1][1],
+    longitude = data[0]['path'][-1][0],
     zoom = 10
     )
     
     deck = dek.Deck(
         layers = [path_lyr],
         initial_view_state = view_state,
-        map_provider = 'google_maps',
-        map_style = 'roadmap'
+        api_keys = {'google_maps': GOOGLE_MAPS_API_KEY},
+        **presets['deck']
     )
+
+    deck
