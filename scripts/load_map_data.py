@@ -1,3 +1,6 @@
+"""
+Loading data and testing pydeck.
+"""
 from typing import Final
 from pathlib import Path
 from typing import Literal
@@ -63,4 +66,6 @@ if __name__ == "__main__":
         **presets['deck']
     )
 
-    deck
+    deck.to_html(
+        PROJECT_PATH.joinpath('outputs', 'load_map_data.html')
+    )
